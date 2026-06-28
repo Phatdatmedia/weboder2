@@ -1,0 +1,1301 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Quản trị đơn hàng — Phatdatagency</title>
+<meta name="robots" content="noindex, nofollow">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;0,9..144,700;1,9..144,500&family=Inter:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --paper:        #F2EEE6;
+  --paper-deep:   #E9E2D4;
+  --ink:          #211C16;
+  --ink-soft:     #5B5347;
+  --line:         #D8D0BF;
+  --coral:        #FF4B2E;
+  --coral-deep:   #D6391E;
+  --coral-tint:   #FFE4DB;
+  --sage:         #6B7A5E;
+  --white:        #FFFCF6;
+
+  --font-display: 'Fraunces', serif;
+  --font-body:    'Inter', sans-serif;
+  --font-mono:    'Space Mono', monospace;
+
+  --radius-sm: 4px;
+  --radius-md: 10px;
+  --radius-lg: 22px;
+
+  --shadow-card: 0 1px 2px rgba(33,28,22,0.04), 0 8px 24px -8px rgba(33,28,22,0.10);
+  --shadow-pop:  0 4px 8px rgba(33,28,22,0.06), 0 24px 48px -16px rgba(33,28,22,0.20);
+}
+
+*{ box-sizing: border-box; margin:0; padding:0; }
+html{ scroll-behavior: smooth; }
+body{
+  font-family: var(--font-body);
+  background: var(--paper);
+  color: var(--ink);
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+img{ max-width:100%; display:block; }
+button{ font-family: inherit; cursor:pointer; }
+a{ color:inherit; text-decoration:none; }
+input, textarea, select{ font-family: inherit; font-size: inherit; color: inherit; }
+::selection{ background: var(--coral); color: var(--white); }
+a:focus-visible, button:focus-visible, input:focus-visible{ outline: 2px solid var(--coral); outline-offset: 2px; }
+@media (prefers-reduced-motion: reduce){
+  *{ animation-duration: 0.001ms !important; transition-duration: 0.001ms !important; }
+}
+h1,h2,h3,h4{ font-family: var(--font-display); font-weight:600; line-height:1.08; letter-spacing:-0.01em; }
+
+.btn{
+  display:inline-flex; align-items:center; justify-content:center; gap:8px;
+  padding: 14px 26px; border-radius: 999px; font-weight:600; font-size:14.5px;
+  border: 1.5px solid transparent;
+  transition: transform .18s ease, background .18s ease, color .18s ease, border-color .18s ease, box-shadow .18s ease;
+  white-space:nowrap;
+}
+.btn-primary{ background: var(--ink); color: var(--white); }
+.btn-primary:hover{ background: var(--coral); transform: translateY(-2px); box-shadow: 0 10px 24px -8px rgba(255,75,46,0.55); }
+.btn-ghost{ background: transparent; border-color: var(--ink); color: var(--ink); }
+.btn-ghost:hover{ background: var(--ink); color: var(--white); transform: translateY(-2px); }
+.btn-sm{ padding: 10px 18px; font-size: 13px; }
+.btn:active{ transform: translateY(0); }
+.btn[disabled]{ opacity:.5; cursor:not-allowed; transform:none !important; box-shadow:none !important; }
+
+.field{
+  width:100%; padding: 14px 16px; border:1.5px solid var(--line); border-radius: var(--radius-sm);
+  background: var(--paper); font-size:14.5px;
+  transition: border-color .18s ease, background .18s ease;
+}
+.field:focus{ outline:none; border-color: var(--ink); background: var(--white); }
+
+::-webkit-scrollbar{ width:10px; }
+::-webkit-scrollbar-track{ background: var(--paper); }
+::-webkit-scrollbar-thumb{ background: var(--line); border-radius:8px; }
+::-webkit-scrollbar-thumb:hover{ background: var(--ink-soft); }
+
+/* ====================== ADMIN LOGIN ====================== */
+.login-screen{
+  min-height:100vh;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding: 20px;
+}
+.login-box{
+  width:100%;
+  max-width: 380px;
+  background: var(--white);
+  border:1px solid var(--line);
+  border-radius: var(--radius-lg);
+  padding: 40px 36px;
+  box-shadow: var(--shadow-pop);
+}
+.login-box .login-logo{
+  font-family: var(--font-display);
+  font-size:22px;
+  font-weight:700;
+  margin-bottom:6px;
+}
+.login-box .login-logo .dot{ color: var(--coral); }
+.login-box .login-sub{ font-size:13.5px; color: var(--ink-soft); margin-bottom:28px; }
+.login-box label{ font-size:12.5px; font-weight:600; color: var(--ink-soft); display:block; margin-bottom:7px; }
+.login-box .field{ margin-bottom:8px; }
+.login-error{ color:#A8311A; font-size:13px; min-height:18px; margin-bottom:10px; display:none; }
+.login-error.show{ display:block; }
+.login-box button{ width:100%; margin-top:8px; }
+
+/* ====================== DASHBOARD ====================== */
+.dash-shell{ display:flex; min-height:100vh; }
+.dash-sidebar{
+  width: 240px;
+  flex-shrink:0;
+  background: var(--ink);
+  color: var(--paper);
+  padding: 28px 20px;
+  display:flex;
+  flex-direction:column;
+  position:sticky;
+  top:0;
+  height:100vh;
+}
+.dash-logo{ font-family: var(--font-display); font-size:20px; font-weight:700; color:var(--white); margin-bottom:40px; }
+.dash-logo .dot{ color: var(--coral); }
+.dash-nav{ display:flex; flex-direction:column; gap:4px; }
+.dash-nav-item{
+  padding: 11px 14px;
+  border-radius:8px;
+  font-size:13.5px;
+  color: #B8B0A0;
+  display:flex; align-items:center; gap:10px;
+  transition: background .15s ease, color .15s ease;
+}
+.dash-nav-item:hover{ background: rgba(255,255,255,0.06); color: var(--white); }
+.dash-nav-item.active{ background: var(--coral); color: var(--white); }
+.dash-back{ margin-top:auto; font-size:12.5px; color:#B8B0A0; display:flex; align-items:center; gap:8px; }
+.dash-back:hover{ color: var(--white); }
+
+.dash-main{ flex:1; padding: 32px 40px; min-width:0; }
+.dash-top{ display:flex; justify-content:space-between; align-items:center; margin-bottom:30px; flex-wrap:wrap; gap:16px; }
+.dash-top h1{ font-size:26px; }
+.dash-top p{ color: var(--ink-soft); font-size:13.5px; margin-top:4px; }
+
+.dash-stats{ display:grid; grid-template-columns: repeat(4,1fr); gap:18px; margin-bottom:32px; }
+.dash-stat-card{ background: var(--white); border:1px solid var(--line); border-radius: var(--radius-md); padding:20px; }
+.dash-stat-card .ds-label{ font-family: var(--font-mono); font-size:11px; color: var(--ink-soft); text-transform:uppercase; }
+.dash-stat-card .ds-val{ font-family: var(--font-display); font-size:32px; margin-top:8px; }
+.dash-stat-card .ds-sub{ font-size:12px; color: var(--sage); margin-top:4px; }
+
+.dash-table-wrap{ background: var(--white); border:1px solid var(--line); border-radius: var(--radius-md); overflow:hidden; }
+.dash-table-head{ display:flex; justify-content:space-between; align-items:center; padding: 18px 22px; border-bottom:1px solid var(--line); }
+.dash-table-head h3{ font-size:16px; font-family: var(--font-body); font-weight:600; }
+.dash-search{ position:relative; }
+.dash-search input{ padding: 9px 14px 9px 34px; border:1.5px solid var(--line); border-radius:999px; font-size:13px; width:220px; background: var(--paper); }
+.dash-search svg{ position:absolute; left:11px; top:50%; transform:translateY(-50%); color:var(--ink-soft); }
+
+table.dash-table{ width:100%; border-collapse:collapse; }
+table.dash-table th{
+  text-align:left; font-family: var(--font-mono); font-size:11px; text-transform:uppercase;
+  color: var(--ink-soft); padding: 12px 22px; border-bottom:1px solid var(--line); background: var(--paper-deep);
+}
+table.dash-table td{ padding: 14px 22px; border-bottom:1px solid var(--line); font-size:13.5px; }
+table.dash-table tr:last-child td{ border-bottom:none; }
+table.dash-table tr:hover td{ background: var(--paper); }
+.dt-code{ font-family: var(--font-mono); font-size:12.5px; }
+.or-status{
+  display:inline-flex; padding:6px 14px; border-radius:999px; font-size:12.5px; font-weight:600; font-family: var(--font-mono);
+}
+.status-pending{ background:#FFF0DC; color:#9A6300; }
+.status-progress{ background:#DCEBFF; color:#1A53A8; }
+.status-done{ background:#DFF3E1; color:#226B30; }
+.status-cancel{ background:#FBE0DC; color:#A8311A; }
+.dash-empty{ padding: 60px 20px; text-align:center; color: var(--ink-soft); font-size:14px; }
+.dash-loading{ padding: 60px 20px; text-align:center; color: var(--ink-soft); font-size:14px; font-family: var(--font-mono); }
+
+/* ====================== MOBILE TAB BAR (thay sidebar khi màn hình nhỏ) ====================== */
+.mobile-tabbar{
+  display:none;
+  gap:8px;
+  padding: 12px 16px;
+  background: var(--ink);
+  position:sticky;
+  top:0;
+  z-index:50;
+  overflow-x:auto;
+}
+.mobile-tabbar button{
+  flex-shrink:0;
+  font-size:13px;
+  padding: 9px 16px;
+  border-radius:999px;
+  border:1.5px solid rgba(255,255,255,0.18);
+  background: transparent;
+  color:#B8B0A0;
+  font-family: var(--font-body);
+}
+.mobile-tabbar button.active{
+  background: var(--coral);
+  border-color: var(--coral);
+  color: var(--white);
+}
+.mobile-tabbar button.logout-btn{
+  margin-left:auto;
+  color:#B8B0A0;
+  border-color: transparent;
+}
+
+@media (max-width: 980px){
+  .dash-shell{ flex-direction: column; }
+  .dash-stats{ grid-template-columns: 1fr 1fr; }
+  .dash-sidebar{ display:none; }
+  .dash-main{ padding: 24px 18px; }
+  table.dash-table{ display:block; overflow-x:auto; white-space:nowrap; }
+  .mobile-tabbar{ display:flex; }
+}
+
+
+/* ====================== STATUS SELECT (trong bảng) ====================== */
+.status-select{
+  font-family: var(--font-mono); font-size:11.5px; padding:6px 10px; border-radius:999px;
+  border:1.5px solid var(--line); background:var(--white); cursor:pointer;
+}
+.status-select.status-pending{ border-color:#E0B568; }
+.status-select.status-progress{ border-color:#7FA8E0; }
+.status-select.status-done{ border-color:#7FC089; }
+.status-select.status-cancel{ border-color:#E08B7A; }
+
+/* ====================== TAB PANELS ====================== */
+.tab-panel{ display:none; }
+.tab-panel.active{ display:block; }
+
+/* ====================== SERVICE TABLE ====================== */
+.svc-toolbar{ display:flex; justify-content:flex-end; margin-bottom:16px; }
+.svc-status-pill{
+  font-family: var(--font-mono); font-size:11.5px; padding:5px 12px; border-radius:999px; font-weight:600;
+}
+.svc-status-active{ background:#DFF3E1; color:#226B30; }
+.svc-status-inactive{ background:#EFE8DA; color:#7A7060; }
+.svc-actions{ display:flex; gap:8px; }
+.svc-actions button{
+  font-size:12px; padding:7px 12px; border-radius:8px; border:1.5px solid var(--line); background:var(--white);
+  display:inline-flex; align-items:center; gap:5px;
+}
+.svc-actions button:hover{ border-color: var(--ink); }
+.svc-actions button.danger:hover{ border-color:#A8311A; color:#A8311A; }
+
+/* ====================== SERVICE MODAL ====================== */
+.modal-overlay{
+  position:fixed; inset:0; background: rgba(33,28,22,0.55); backdrop-filter: blur(3px);
+  z-index:1000; display:none; align-items:flex-start; justify-content:center;
+  padding: 40px 20px; overflow-y:auto;
+}
+.modal-overlay.show{ display:flex; }
+.modal{
+  background: var(--paper); border-radius: var(--radius-lg); max-width: 520px; width:100%;
+  margin-top: 60px; box-shadow: var(--shadow-pop);
+}
+.modal-head{ display:flex; justify-content:space-between; align-items:center; padding: 22px 26px; border-bottom: 1px solid var(--line); }
+.modal-head h3{ font-size:19px; font-family: var(--font-display); font-weight:600; }
+.modal-close{
+  width:32px; height:32px; border-radius:50%; border:1.5px solid var(--line); background:var(--white);
+  display:flex; align-items:center; justify-content:center;
+}
+.modal-close:hover{ background: var(--ink); border-color:var(--ink); color:var(--white); }
+.modal-body{ padding: 22px 26px 26px; }
+.form-group{ display:flex; flex-direction:column; gap:7px; margin-bottom:16px; }
+.form-group label{ font-size:12.5px; font-weight:600; color: var(--ink-soft); }
+.form-row{ display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+textarea.field{ resize:vertical; min-height:70px; }
+.modal-error{ color:#A8311A; font-size:13px; margin-bottom:10px; display:none; }
+.modal-error.show{ display:block; }
+.modal-submit-row{ display:flex; justify-content:flex-end; gap:10px; margin-top:6px; }
+
+/* ====================== TOAST ====================== */
+.toast{
+  position:fixed; bottom:24px; left:50%; transform: translateX(-50%) translateY(20px);
+  background: var(--ink); color: var(--white);
+  padding: 14px 22px; border-radius: 999px; font-size:13.5px;
+  display:flex; align-items:center; gap:10px;
+  box-shadow: var(--shadow-pop);
+  z-index: 2000;
+  opacity:0; pointer-events:none;
+  transition: all .3s cubic-bezier(.2,.9,.3,1.2);
+}
+.toast.show{ opacity:1; transform: translateX(-50%) translateY(0); pointer-events:auto; }
+.toast .t-dot{ width:7px; height:7px; border-radius:50%; background: var(--coral); }
+</style>
+</head>
+<body>
+
+<!-- LOGIN SCREEN -->
+<div class="login-screen" id="loginScreen">
+  <div class="login-box">
+    <div class="login-logo">Phatdatagency<span class="dot">.</span></div>
+    <p class="login-sub">Đăng nhập quản trị để xem dashboard đơn hàng.</p>
+    <label for="adminPassword">Mật khẩu admin</label>
+    <input type="password" class="field" id="adminPassword" placeholder="••••••••" autocomplete="off">
+    <div class="login-error" id="loginError">Sai mật khẩu, vui lòng thử lại.</div>
+    <button class="btn btn-primary" id="loginBtn" onclick="handleAdminLogin()">Đăng nhập</button>
+  </div>
+</div>
+
+<!-- ACTUAL DASHBOARD (shown only after login) -->
+<div class="dash-shell" id="dashShell" style="display:none;">
+
+  <!-- Thanh tab cho mobile (thay sidebar khi màn hình nhỏ) -->
+  <nav class="mobile-tabbar">
+    <button class="active" id="mobileTabOverview" onclick="switchTab('overview')">Tổng quan</button>
+    <button id="mobileTabServices" onclick="switchTab('services')">Dịch vụ</button>
+    <button id="mobileTabProjects" onclick="switchTab('projects')">Dự án</button>
+    <button id="mobileTabUsers"    onclick="switchTab('users')">Người dùng</button>
+    <button class="logout-btn" onclick="handleAdminLogout()">Đăng xuất</button>
+  </nav>
+
+  <aside class="dash-sidebar">
+    <div class="dash-logo">Phatdatagency<span class="dot">.</span></div>
+    <nav class="dash-nav">
+      <a href="javascript:void(0)" class="dash-nav-item active" id="navTabOverview" onclick="switchTab('overview')">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+        Tổng quan
+      </a>
+      <a href="javascript:void(0)" class="dash-nav-item" id="navTabServices" onclick="switchTab('services')">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M20 7h-9M14 17H5M17 4v6M7 14v6" stroke-linecap="round"/></svg>
+        Dịch vụ
+      </a>
+      <a href="javascript:void(0)" class="dash-nav-item" id="navTabProjects" onclick="switchTab('projects')">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="8" height="8" rx="1"/><rect x="13" y="3" width="8" height="8" rx="1"/><rect x="3" y="13" width="8" height="8" rx="1"/><rect x="13" y="13" width="8" height="8" rx="1"/></svg>
+        Showcase
+      </a>
+      <a href="javascript:void(0)" class="dash-nav-item" id="navTabUsers" onclick="switchTab('users')">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="9" cy="7" r="4"/><path d="M3 21v-2a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v2"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/><path d="M21 21v-2a4 4 0 0 0-3-3.87"/></svg>
+        Người dùng
+      </a>
+    </nav>
+    <a href="javascript:void(0)" class="dash-back" onclick="handleAdminLogout()">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="M16 17l5-5-5-5"/><path d="M21 12H9"/></svg>
+      Đăng xuất
+    </a>
+  </aside>
+
+  <main class="dash-main">
+
+    <!-- TAB: TỔNG QUAN / ĐƠN HÀNG -->
+    <div class="tab-panel active" id="tabOverview">
+      <div class="dash-top">
+        <div>
+          <h1>Tổng quan đơn hàng</h1>
+          <p>Dữ liệu đồng bộ trực tiếp từ Google Sheet.</p>
+        </div>
+        <button class="btn btn-ghost btn-sm" onclick="loadDashboard()">↻ Làm mới dữ liệu</button>
+      </div>
+
+      <div class="dash-stats">
+        <div class="dash-stat-card">
+          <div class="ds-label">Tổng đơn</div>
+          <div class="ds-val" id="statTotal">—</div>
+        </div>
+        <div class="dash-stat-card">
+          <div class="ds-label">Chờ xác nhận</div>
+          <div class="ds-val" id="statPending">—</div>
+        </div>
+        <div class="dash-stat-card">
+          <div class="ds-label">Đang thực hiện</div>
+          <div class="ds-val" id="statProgress">—</div>
+        </div>
+        <div class="dash-stat-card">
+          <div class="ds-label">Hoàn thành</div>
+          <div class="ds-val" id="statDone">—</div>
+        </div>
+      </div>
+
+      <div class="dash-table-wrap" id="dashOrdersTable">
+        <div class="dash-table-head">
+          <h3>Danh sách đơn hàng</h3>
+          <div class="dash-search">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+            <input type="text" id="dashSearchInput" placeholder="Tìm theo mã đơn, tên...">
+          </div>
+        </div>
+        <div id="dashTableBody">
+          <div class="dash-loading">Chưa kết nối Google Sheet — xem hướng dẫn trong file apps-script-backend.gs</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB: DỊCH VỤ -->
+    <div class="tab-panel" id="tabServices">
+      <div class="dash-top">
+        <div>
+          <h1>Quản lý dịch vụ</h1>
+          <p>Dịch vụ "Đang bán" sẽ hiển thị trên trang chủ cho khách đặt đơn.</p>
+        </div>
+        <button class="btn btn-ghost btn-sm" onclick="loadServicesTable()">↻ Làm mới dữ liệu</button>
+      </div>
+
+      <div class="svc-toolbar">
+        <button class="btn btn-primary btn-sm" onclick="openServiceModal()">+ Thêm dịch vụ</button>
+      </div>
+
+      <div class="dash-table-wrap" id="servicesTableWrap">
+        <div class="dash-table-head">
+          <h3>Danh sách dịch vụ</h3>
+        </div>
+        <div id="servicesTableBody">
+          <div class="dash-loading">Đang tải...</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB: SHOWCASE / PROJECTS -->
+    <div class="tab-panel" id="tabProjects">
+      <div class="dash-top">
+        <div>
+          <h1>Quản lý Showcase</h1>
+          <p>Dự án "Hiển thị" sẽ xuất hiện trên <a href="showcase.html" target="_blank" style="color:var(--coral);">showcase.html ↗</a></p>
+        </div>
+        <button class="btn btn-ghost btn-sm" onclick="loadProjectsTable()">↻ Làm mới</button>
+      </div>
+      <div class="svc-toolbar">
+        <button class="btn btn-primary btn-sm" onclick="openProjectModal()">+ Thêm dự án</button>
+      </div>
+      <div class="dash-table-wrap">
+        <div class="dash-table-head"><h3>Danh sách dự án</h3></div>
+        <div id="projectsTableBody"><div class="dash-loading">Đang tải...</div></div>
+      </div>
+    </div>
+
+    <!-- TAB: NGƯỜI DÙNG -->
+    <div class="tab-panel" id="tabUsers">
+      <div class="dash-top">
+        <div>
+          <h1>Người dùng</h1>
+          <p>Danh sách tài khoản đã đăng ký qua trang <a href="account.html" target="_blank" style="color:var(--coral);">account.html ↗</a></p>
+        </div>
+        <button class="btn btn-ghost btn-sm" onclick="loadUsersTable()">↻ Làm mới</button>
+      </div>
+
+      <div class="dash-stats" style="grid-template-columns:repeat(3,1fr);">
+        <div class="dash-stat-card">
+          <div class="ds-label">Tổng tài khoản</div>
+          <div class="ds-val" id="uStatAll">—</div>
+        </div>
+        <div class="dash-stat-card">
+          <div class="ds-label">Đang hoạt động</div>
+          <div class="ds-val" id="uStatActive">—</div>
+        </div>
+        <div class="dash-stat-card">
+          <div class="ds-label">Đã khoá</div>
+          <div class="ds-val" id="uStatLocked">—</div>
+        </div>
+      </div>
+
+      <div class="dash-table-wrap">
+        <div class="dash-table-head"><h3>Danh sách tài khoản</h3>
+          <div class="dash-search">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+            <input type="text" id="userSearchInput" placeholder="Tìm theo tên, email...">
+          </div>
+        </div>
+        <div id="usersTableBody"><div class="dash-loading">Đang tải...</div></div>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<!-- ======================= PROJECT MODAL (thêm / sửa) ======================= -->
+<div class="modal-overlay" id="projectModalOverlay">
+  <div class="modal" style="max-width:580px;">
+    <div class="modal-head">
+      <h3 id="projectModalTitle">Thêm dự án</h3>
+      <button class="modal-close" onclick="closeProjectModal()">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M18 6 6 18M6 6l12 12"/></svg>
+      </button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label>Tên dự án *</label>
+        <input type="text" class="field" id="prj_name" placeholder="VD: Landing Page Mỹ phẩm">
+      </div>
+      <div class="form-group">
+        <label>Mô tả</label>
+        <textarea class="field" id="prj_desc" placeholder="Mô tả ngắn gọn về dự án (hiển thị trong card và chi tiết)"></textarea>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Loại dự án</label>
+          <select class="field" id="prj_type">
+            <option value="Website">Website</option>
+            <option value="Tool">Tool</option>
+            <option value="Slide">Slide</option>
+            <option value="Profile">Profile</option>
+            <option value="Khác">Khác</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Thứ tự hiển thị</label>
+          <input type="number" class="field" id="prj_order" value="1" min="1">
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Tags (phân cách bằng dấu phẩy)</label>
+        <input type="text" class="field" id="prj_tags" placeholder="VD: Landing Page,E-commerce,Beauty">
+      </div>
+      <div class="form-group">
+        <label>Link demo (URL)</label>
+        <input type="text" class="field" id="prj_link" placeholder="https://...">
+      </div>
+      <div class="form-group">
+        <label>Ảnh thumbnail (URL ảnh, hiển thị trên card)</label>
+        <input type="text" class="field" id="prj_thumb" placeholder="https://images.unsplash.com/...">
+        <small style="color:var(--ink-soft);font-size:11.5px;margin-top:4px;">URL ảnh trực tiếp (.jpg/.png) hoặc để trống</small>
+      </div>
+      <div class="form-group">
+        <label>Ảnh chi tiết / Link preview (URL ảnh lớn hoặc URL trang demo để embed)</label>
+        <input type="text" class="field" id="prj_detail" placeholder="https://...">
+        <small style="color:var(--ink-soft);font-size:11.5px;margin-top:4px;">Để trống thì dùng ảnh thumbnail. Nếu là URL trang web sẽ embed bằng iframe.</small>
+      </div>
+      <div class="form-group">
+        <label>Trạng thái</label>
+        <select class="field" id="prj_status">
+          <option value="Hiển thị">Hiển thị (xuất hiện trên showcase)</option>
+          <option value="Ẩn">Ẩn (không hiển thị)</option>
+        </select>
+      </div>
+      <div class="modal-error" id="projectModalError"></div>
+      <div class="modal-submit-row">
+        <button class="btn btn-ghost btn-sm" onclick="closeProjectModal()">Huỷ</button>
+        <button class="btn btn-primary btn-sm" id="projectSaveBtn" onclick="handleSaveProject()">Lưu dự án</button>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="modal-overlay" id="serviceModalOverlay">
+  <div class="modal">
+    <div class="modal-head">
+      <h3 id="serviceModalTitle">Thêm dịch vụ</h3>
+      <button class="modal-close" onclick="closeServiceModal()">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M18 6 6 18M6 6l12 12"/></svg>
+      </button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label>Tên dịch vụ *</label>
+        <input type="text" class="field" id="svc_name" placeholder="VD: Thiết kế Website">
+      </div>
+      <div class="form-group">
+        <label>Mô tả</label>
+        <textarea class="field" id="svc_desc" placeholder="Mô tả ngắn gọn hiển thị trên trang chủ"></textarea>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Giá hiển thị</label>
+          <input type="text" class="field" id="svc_price" placeholder="VD: Từ 2.500.000đ">
+        </div>
+        <div class="form-group">
+          <label>Thứ tự hiển thị</label>
+          <input type="number" class="field" id="svc_order" placeholder="1" value="1">
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Trạng thái</label>
+        <select class="field" id="svc_status">
+          <option value="Đang bán">Đang bán (hiện trên trang chủ)</option>
+          <option value="Ngừng bán">Ngừng bán (ẩn khỏi trang chủ)</option>
+        </select>
+      </div>
+      <div class="modal-error" id="serviceModalError"></div>
+      <div class="modal-submit-row">
+        <button class="btn btn-ghost btn-sm" onclick="closeServiceModal()">Huỷ</button>
+        <button class="btn btn-primary btn-sm" id="serviceSaveBtn" onclick="handleSaveService()">Lưu dịch vụ</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast">
+  <span class="t-dot"></span>
+  <span id="toastMsg">Đã sao chép</span>
+</div>
+
+<script>
+/* =====================================================================
+   CẤU HÌNH — PHẢI giống hệt URL trong file index.html
+===================================================================== */
+const CONFIG = {
+  APPS_SCRIPT_URL: "https://script.google.com/macros/s/AKfycbz7YbtBLEnC2IBV4ztUDAIGTuFQCDr078tLRXyk7BpZbKqqOSba67hkWjnPzAD9Unz02w/exec"
+};
+
+/* =====================================================================
+   AUTH / LOGIN
+===================================================================== */
+function showLoginScreen(){
+  document.getElementById('loginScreen').style.display = 'flex';
+  document.getElementById('dashShell').style.display = 'none';
+  document.getElementById('adminPassword').value = '';
+  document.getElementById('loginError').classList.remove('show');
+  setTimeout(()=> document.getElementById('adminPassword').focus(), 100);
+}
+function showDashShell(){
+  document.getElementById('loginScreen').style.display = 'none';
+  document.getElementById('dashShell').style.display = 'flex';
+  loadDashboard();
+}
+
+async function handleAdminLogin(){
+  const pwInput = document.getElementById('adminPassword');
+  const password = pwInput.value;
+  const errBox = document.getElementById('loginError');
+  const btn = document.getElementById('loginBtn');
+
+  if(!password){
+    errBox.textContent = "Vui lòng nhập mật khẩu.";
+    errBox.classList.add('show');
+    return;
+  }
+  if(!isBackendConfigured()){
+    errBox.textContent = "Chưa cấu hình APPS_SCRIPT_URL trong code.";
+    errBox.classList.add('show');
+    return;
+  }
+
+  errBox.classList.remove('show');
+  const originalText = btn.textContent;
+  btn.disabled = true;
+  btn.textContent = "Đang kiểm tra...";
+
+  try{
+    const result = await callBackend('adminLogin', { password });
+    if(result.ok){
+      sessionStorage.setItem('admin_token', result.token);
+      showDashShell();
+    } else {
+      errBox.textContent = result.error || "Sai mật khẩu, vui lòng thử lại.";
+      errBox.classList.add('show');
+    }
+  } catch(err){
+    errBox.textContent = "Không thể kết nối máy chủ. Kiểm tra lại APPS_SCRIPT_URL.";
+    errBox.classList.add('show');
+  } finally {
+    btn.disabled = false;
+    btn.textContent = originalText;
+  }
+}
+
+function handleAdminLogout(){
+  sessionStorage.removeItem('admin_token');
+  showLoginScreen();
+}
+
+document.getElementById('adminPassword').addEventListener('keydown', (e)=>{
+  if(e.key === 'Enter') handleAdminLogin();
+});
+
+/* =====================================================================
+   TOAST
+===================================================================== */
+let toastTimer = null;
+function showToast(msg){
+  const t = document.getElementById('toast');
+  document.getElementById('toastMsg').textContent = msg;
+  t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(()=> t.classList.remove('show'), 2600);
+}
+
+/* =====================================================================
+   BACKEND COMMUNICATION (Google Apps Script)
+===================================================================== */
+function isBackendConfigured(){
+  return CONFIG.APPS_SCRIPT_URL && CONFIG.APPS_SCRIPT_URL.indexOf("PASTE_YOUR") !== 0;
+}
+
+async function callBackend(action, payload){
+  if(!isBackendConfigured()){
+    throw new Error("Chưa cấu hình APPS_SCRIPT_URL");
+  }
+  const res = await fetch(CONFIG.APPS_SCRIPT_URL, {
+    method: 'POST',
+    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+    body: JSON.stringify({ action, ...payload })
+  });
+  return await res.json();
+}
+
+async function callBackendGet(params){
+  if(!isBackendConfigured()){
+    throw new Error("Chưa cấu hình APPS_SCRIPT_URL");
+  }
+  const url = new URL(CONFIG.APPS_SCRIPT_URL);
+  Object.keys(params).forEach(k => url.searchParams.set(k, params[k]));
+  const res = await fetch(url.toString());
+  return await res.json();
+}
+
+/* =====================================================================
+   DASHBOARD DATA
+===================================================================== */
+const STATUS_MAP = {
+  "Chờ xác nhận":     { cls: "status-pending",  step: 0 },
+  "Đã xác nhận":      { cls: "status-progress", step: 1 },
+  "Đang thực hiện":   { cls: "status-progress", step: 2 },
+  "Hoàn thành":       { cls: "status-done",     step: 3 },
+  "Đã huỷ":           { cls: "status-cancel",   step: -1 }
+};
+
+let allOrders = [];
+
+async function loadDashboard(){
+  const tableBody = document.getElementById('dashTableBody');
+
+  if(!isBackendConfigured()){
+    tableBody.innerHTML = `<div class="dash-empty">Chưa kết nối Google Sheet.<br>Hãy dán URL Apps Script Web App vào biến <code>APPS_SCRIPT_URL</code> trong code.</div>`;
+    return;
+  }
+
+  const token = sessionStorage.getItem('admin_token');
+  if(!token){
+    showLoginScreen();
+    return;
+  }
+
+  tableBody.innerHTML = `<div class="dash-loading">Đang tải dữ liệu...</div>`;
+
+  try{
+    const result = await callBackendGet({ action: 'list', token });
+    if(result.ok){
+      allOrders = result.orders || [];
+      renderDashboard(allOrders);
+    } else {
+      sessionStorage.removeItem('admin_token');
+      showLoginScreen();
+      document.getElementById('loginError').textContent = result.error || "Phiên đăng nhập hết hạn, vui lòng đăng nhập lại.";
+      document.getElementById('loginError').classList.add('show');
+    }
+  } catch(err){
+    tableBody.innerHTML = `<div class="dash-empty">Không thể kết nối Google Sheet. Kiểm tra lại APPS_SCRIPT_URL.</div>`;
+  }
+}
+
+function renderDashboard(orders){
+  document.getElementById('statTotal').textContent = orders.length;
+  document.getElementById('statPending').textContent = orders.filter(o=> o["Trạng thái"] === "Chờ xác nhận").length;
+  document.getElementById('statProgress').textContent = orders.filter(o=> ["Đã xác nhận","Đang thực hiện"].includes(o["Trạng thái"])).length;
+  document.getElementById('statDone').textContent = orders.filter(o=> o["Trạng thái"] === "Hoàn thành").length;
+
+  const tableBody = document.getElementById('dashTableBody');
+  if(orders.length === 0){
+    tableBody.innerHTML = `<div class="dash-empty">Chưa có đơn hàng nào.</div>`;
+    return;
+  }
+
+  let html = `<table class="dash-table"><thead><tr>
+    <th>Mã đơn</th><th>Khách hàng</th><th>Dịch vụ</th><th>Thanh toán</th><th>Thời gian</th><th>Trạng thái</th>
+  </tr></thead><tbody>`;
+
+  orders.slice().reverse().forEach(o=>{
+    const status = o["Trạng thái"] || "Chờ xác nhận";
+    const code = escapeHtml(o["Mã đơn"]);
+    html += `<tr>
+      <td class="dt-code">${code}</td>
+      <td>${escapeHtml(o["Họ tên"])}<br><span style="color:var(--ink-soft); font-size:11.5px;">${escapeHtml(o["SĐT"]||'')}</span></td>
+      <td>${escapeHtml(o["Loại dịch vụ"]||'')}</td>
+      <td style="font-size:12px; color:var(--ink-soft);">${escapeHtml(o["Phương thức TT"]||'—')}</td>
+      <td style="font-size:12px; color:var(--ink-soft);">${escapeHtml(o["Thời gian đặt"]||'')}</td>
+      <td>${renderStatusSelect(code, status)}</td>
+    </tr>`;
+  });
+  html += `</tbody></table>`;
+  tableBody.innerHTML = html;
+
+  tableBody.querySelectorAll('.status-select').forEach(sel=>{
+    sel.addEventListener('change', (e)=> handleStatusChange(e.target.dataset.code, e.target.value, e.target));
+  });
+}
+
+function renderStatusSelect(code, currentStatus){
+  const meta = STATUS_MAP[currentStatus] || { cls: "status-pending" };
+  const options = Object.keys(STATUS_MAP).map(s =>
+    `<option value="${escapeHtml(s)}" ${s === currentStatus ? 'selected' : ''}>${escapeHtml(s)}</option>`
+  ).join('');
+  return `<select class="status-select ${meta.cls}" data-code="${code}">${options}</select>`;
+}
+
+async function handleStatusChange(code, newStatus, selectEl){
+  const token = sessionStorage.getItem('admin_token');
+  selectEl.disabled = true;
+  try{
+    const result = await callBackend('updateOrderStatus', { token, code, status: newStatus });
+    if(result.ok){
+      showToast(`Đã cập nhật trạng thái đơn ${code}.`);
+      const order = allOrders.find(o => o["Mã đơn"] === code);
+      if(order) order["Trạng thái"] = newStatus;
+      const meta = STATUS_MAP[newStatus] || { cls: "status-pending" };
+      selectEl.className = "status-select " + meta.cls;
+      document.getElementById('statTotal').textContent = allOrders.length;
+      document.getElementById('statPending').textContent = allOrders.filter(o=> o["Trạng thái"] === "Chờ xác nhận").length;
+      document.getElementById('statProgress').textContent = allOrders.filter(o=> ["Đã xác nhận","Đang thực hiện"].includes(o["Trạng thái"])).length;
+      document.getElementById('statDone').textContent = allOrders.filter(o=> o["Trạng thái"] === "Hoàn thành").length;
+    } else {
+      showToast("Lỗi: " + (result.error || "không cập nhật được"));
+    }
+  } catch(err){
+    showToast("Không thể kết nối máy chủ.");
+  } finally {
+    selectEl.disabled = false;
+  }
+}
+
+function escapeHtml(str){
+  if(str === undefined || str === null) return '';
+  return String(str).replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+}
+
+document.getElementById('dashSearchInput').addEventListener('input', (e)=>{
+  const q = e.target.value.trim().toLowerCase();
+  if(!q){ renderDashboard(allOrders); return; }
+  const filtered = allOrders.filter(o=>
+    String(o["Mã đơn"]||'').toLowerCase().includes(q) ||
+    String(o["Họ tên"]||'').toLowerCase().includes(q) ||
+    String(o["Loại dịch vụ"]||'').toLowerCase().includes(q)
+  );
+  renderDashboard(filtered);
+});
+
+/* =====================================================================
+   TAB SWITCHING
+===================================================================== */
+function switchTab(tab){
+  ['overview','services','projects','users'].forEach(t => {
+    const capT = t.charAt(0).toUpperCase() + t.slice(1);
+    document.getElementById('tab'       + capT).classList.toggle('active', tab === t);
+    document.getElementById('navTab'    + capT).classList.toggle('active', tab === t);
+    document.getElementById('mobileTab' + capT).classList.toggle('active', tab === t);
+  });
+
+  if(tab === 'services' && allServices.length === 0) loadServicesTable();
+  if(tab === 'projects' && allProjects.length === 0) loadProjectsTable();
+  if(tab === 'users'    && allUsers.length    === 0) loadUsersTable();
+}
+
+/* =====================================================================
+   SERVICES — CRUD
+===================================================================== */
+let allServices = [];
+let editingServiceId = null;
+
+async function loadServicesTable(){
+  const body = document.getElementById('servicesTableBody');
+  const token = sessionStorage.getItem('admin_token');
+
+  if(!isBackendConfigured()){
+    body.innerHTML = `<div class="dash-empty">Chưa cấu hình APPS_SCRIPT_URL.</div>`;
+    return;
+  }
+  if(!token){
+    showLoginScreen();
+    return;
+  }
+
+  body.innerHTML = `<div class="dash-loading">Đang tải dữ liệu...</div>`;
+
+  try{
+    const result = await callBackendGet({ action: 'listServices', onlyActive: '0', token });
+    if(result.ok){
+      allServices = result.services || [];
+      renderServicesTable(allServices);
+    } else {
+      body.innerHTML = `<div class="dash-empty">Lỗi: ${escapeHtml(result.error || 'không xác định')}</div>`;
+    }
+  } catch(err){
+    body.innerHTML = `<div class="dash-empty">Không thể kết nối Google Sheet.</div>`;
+  }
+}
+
+function renderServicesTable(services){
+  const body = document.getElementById('servicesTableBody');
+  if(services.length === 0){
+    body.innerHTML = `<div class="dash-empty">Chưa có dịch vụ nào. Bấm "+ Thêm dịch vụ" để tạo mới.</div>`;
+    return;
+  }
+
+  const sorted = services.slice().sort((a,b)=> (Number(a["Thứ tự"])||0) - (Number(b["Thứ tự"])||0));
+
+  let html = `<table class="dash-table"><thead><tr>
+    <th>Thứ tự</th><th>Tên dịch vụ</th><th>Giá hiển thị</th><th>Trạng thái</th><th>Thao tác</th>
+  </tr></thead><tbody>`;
+
+  sorted.forEach(s=>{
+    const isActive = s["Trạng thái"] === "Đang bán";
+    html += `<tr>
+      <td style="font-family:var(--font-mono); color:var(--ink-soft);">${escapeHtml(s["Thứ tự"])}</td>
+      <td><b>${escapeHtml(s["Tên dịch vụ"])}</b><br><span style="font-size:12px; color:var(--ink-soft);">${escapeHtml((s["Mô tả"]||'').slice(0,60))}${(s["Mô tả"]||'').length>60?'…':''}</span></td>
+      <td style="font-family:var(--font-mono); font-size:12.5px;">${escapeHtml(s["Giá hiển thị"]||'—')}</td>
+      <td><span class="svc-status-pill ${isActive ? 'svc-status-active' : 'svc-status-inactive'}">${escapeHtml(s["Trạng thái"])}</span></td>
+      <td>
+        <div class="svc-actions">
+          <button onclick="openServiceModal('${s["ID"]}')">Sửa</button>
+          <button onclick="handleToggleServiceStatus('${s["ID"]}', '${isActive ? 'Ngừng bán' : 'Đang bán'}')">${isActive ? 'Ngừng bán' : 'Mở bán'}</button>
+          <button class="danger" onclick="handleDeleteService('${s["ID"]}', '${escapeHtml(s["Tên dịch vụ"]).replace(/'/g,"\\'")}')">Xoá</button>
+        </div>
+      </td>
+    </tr>`;
+  });
+  html += `</tbody></table>`;
+  body.innerHTML = html;
+}
+
+function openServiceModal(id){
+  editingServiceId = id || null;
+  document.getElementById('serviceModalError').classList.remove('show');
+
+  if(id){
+    const svc = allServices.find(s => s["ID"] === id);
+    document.getElementById('serviceModalTitle').textContent = "Sửa dịch vụ";
+    document.getElementById('svc_name').value = svc ? svc["Tên dịch vụ"] : '';
+    document.getElementById('svc_desc').value = svc ? svc["Mô tả"] : '';
+    document.getElementById('svc_price').value = svc ? svc["Giá hiển thị"] : '';
+    document.getElementById('svc_order').value = svc ? svc["Thứ tự"] : 1;
+    document.getElementById('svc_status').value = svc ? svc["Trạng thái"] : 'Đang bán';
+  } else {
+    document.getElementById('serviceModalTitle').textContent = "Thêm dịch vụ";
+    document.getElementById('svc_name').value = '';
+    document.getElementById('svc_desc').value = '';
+    document.getElementById('svc_price').value = '';
+    document.getElementById('svc_order').value = allServices.length + 1;
+    document.getElementById('svc_status').value = 'Đang bán';
+  }
+
+  document.getElementById('serviceModalOverlay').classList.add('show');
+}
+
+function closeServiceModal(){
+  document.getElementById('serviceModalOverlay').classList.remove('show');
+  editingServiceId = null;
+}
+document.getElementById('serviceModalOverlay').addEventListener('click', (e)=>{
+  if(e.target.id === 'serviceModalOverlay') closeServiceModal();
+});
+
+async function handleSaveService(){
+  const name = document.getElementById('svc_name').value.trim();
+  const desc = document.getElementById('svc_desc').value.trim();
+  const price = document.getElementById('svc_price').value.trim();
+  const order = Number(document.getElementById('svc_order').value) || 1;
+  const status = document.getElementById('svc_status').value;
+  const errBox = document.getElementById('serviceModalError');
+
+  if(!name){
+    errBox.textContent = "Vui lòng nhập tên dịch vụ.";
+    errBox.classList.add('show');
+    return;
+  }
+  errBox.classList.remove('show');
+
+  const token = sessionStorage.getItem('admin_token');
+  const btn = document.getElementById('serviceSaveBtn');
+  const originalText = btn.textContent;
+  btn.disabled = true;
+  btn.textContent = "Đang lưu...";
+
+  const data = { name, description: desc, priceLabel: price, status, order };
+
+  try{
+    let result;
+    if(editingServiceId){
+      result = await callBackend('updateService', { token, id: editingServiceId, data });
+    } else {
+      result = await callBackend('createService', { token, data });
+    }
+
+    if(result.ok){
+      showToast(editingServiceId ? "Đã cập nhật dịch vụ." : "Đã thêm dịch vụ mới.");
+      closeServiceModal();
+      loadServicesTable();
+    } else {
+      errBox.textContent = result.error || "Có lỗi xảy ra, vui lòng thử lại.";
+      errBox.classList.add('show');
+    }
+  } catch(err){
+    errBox.textContent = "Không thể kết nối máy chủ.";
+    errBox.classList.add('show');
+  } finally {
+    btn.disabled = false;
+    btn.textContent = originalText;
+  }
+}
+
+async function handleToggleServiceStatus(id, newStatus){
+  const token = sessionStorage.getItem('admin_token');
+  try{
+    const result = await callBackend('updateService', { token, id, data: { status: newStatus } });
+    if(result.ok){
+      showToast(newStatus === 'Đang bán' ? "Đã mở bán dịch vụ." : "Đã ngừng bán dịch vụ.");
+      loadServicesTable();
+    } else {
+      showToast("Lỗi: " + (result.error || "không cập nhật được"));
+    }
+  } catch(err){
+    showToast("Không thể kết nối máy chủ.");
+  }
+}
+
+async function handleDeleteService(id, name){
+  if(!confirm(`Xoá dịch vụ "${name}"? Hành động này không thể hoàn tác.`)) return;
+
+  const token = sessionStorage.getItem('admin_token');
+  try{
+    const result = await callBackend('deleteService', { token, id });
+    if(result.ok){
+      showToast("Đã xoá dịch vụ.");
+      loadServicesTable();
+    } else {
+      showToast("Lỗi: " + (result.error || "không xoá được"));
+    }
+  } catch(err){
+    showToast("Không thể kết nối máy chủ.");
+  }
+}
+
+/* =====================================================================
+   PROJECTS — CRUD
+===================================================================== */
+let allProjects = [];
+let editingProjectId = null;
+
+async function loadProjectsTable(){
+  const body = document.getElementById('projectsTableBody');
+  const token = sessionStorage.getItem('admin_token');
+
+  if(!isBackendConfigured()){
+    body.innerHTML = `<div class="dash-empty">Chưa cấu hình APPS_SCRIPT_URL.</div>`;
+    return;
+  }
+  if(!token){ showLoginScreen(); return; }
+
+  body.innerHTML = `<div class="dash-loading">Đang tải dữ liệu...</div>`;
+
+  try{
+    const result = await callBackendGet({ action: 'listProjects', onlyPublished: '0', token });
+    if(result.ok){
+      allProjects = result.projects || [];
+      renderProjectsTable(allProjects);
+    } else {
+      // token hết hạn
+      if(result.error && result.error.includes('đăng nhập')){
+        sessionStorage.removeItem('admin_token');
+        showLoginScreen();
+      } else {
+        body.innerHTML = `<div class="dash-empty">Lỗi: ${escapeHtml(result.error||'không xác định')}</div>`;
+      }
+    }
+  } catch(err){
+    body.innerHTML = `<div class="dash-empty">Không thể kết nối Google Sheet.</div>`;
+  }
+}
+
+function renderProjectsTable(projects){
+  const body = document.getElementById('projectsTableBody');
+  if(projects.length === 0){
+    body.innerHTML = `<div class="dash-empty">Chưa có dự án nào. Bấm "+ Thêm dự án" để tạo mới.</div>`;
+    return;
+  }
+  const sorted = projects.slice().sort((a,b) => (Number(a["Thứ tự"])||0) - (Number(b["Thứ tự"])||0));
+  let html = `<table class="dash-table"><thead><tr>
+    <th>#</th><th>Dự án</th><th>Loại</th><th>Link demo</th><th>Trạng thái</th><th>Thao tác</th>
+  </tr></thead><tbody>`;
+
+  sorted.forEach(p => {
+    const isVisible = p["Trạng thái"] === "Hiển thị";
+    const demo = p["Link demo"] || "";
+    html += `<tr>
+      <td style="font-family:var(--font-mono);color:var(--ink-soft);">${escapeHtml(p["Thứ tự"])}</td>
+      <td>
+        <b>${escapeHtml(p["Tên dự án"])}</b><br>
+        <span style="font-size:12px;color:var(--ink-soft);">${escapeHtml((p["Mô tả"]||"").slice(0,55))}${(p["Mô tả"]||"").length>55?"…":""}</span>
+      </td>
+      <td><span class="svc-status-pill svc-status-active" style="background:#EFF0FF;color:#3A3AD6;">${escapeHtml(p["Loại"]||"")}</span></td>
+      <td style="font-size:12px;">${demo ? `<a href="${escapeHtml(demo)}" target="_blank" style="color:var(--coral);">Xem ↗</a>` : "—"}</td>
+      <td><span class="svc-status-pill ${isVisible ? 'svc-status-active' : 'svc-status-inactive'}">${escapeHtml(p["Trạng thái"])}</span></td>
+      <td>
+        <div class="svc-actions">
+          <button onclick="openProjectModal('${p["ID"]}')">Sửa</button>
+          <button onclick="handleToggleProjectStatus('${p["ID"]}','${isVisible ? 'Ẩn' : 'Hiển thị'}')">${isVisible ? 'Ẩn' : 'Hiện'}</button>
+          <button class="danger" onclick="handleDeleteProject('${p["ID"]}','${escapeHtml(p["Tên dự án"]).replace(/'/g,"\\'")}')">Xoá</button>
+        </div>
+      </td>
+    </tr>`;
+  });
+  html += `</tbody></table>`;
+  body.innerHTML = html;
+}
+
+function openProjectModal(id){
+  editingProjectId = id || null;
+  document.getElementById('projectModalError').classList.remove('show');
+
+  if(id){
+    const p = allProjects.find(x => x["ID"] === id);
+    document.getElementById('projectModalTitle').textContent = "Sửa dự án";
+    document.getElementById('prj_name').value   = p ? p["Tên dự án"] : '';
+    document.getElementById('prj_desc').value   = p ? p["Mô tả"] : '';
+    document.getElementById('prj_type').value   = p ? p["Loại"] : 'Website';
+    document.getElementById('prj_tags').value   = p ? p["Tags"] : '';
+    document.getElementById('prj_link').value   = p ? p["Link demo"] : '';
+    document.getElementById('prj_thumb').value  = p ? p["Ảnh thumbnail (URL)"] : '';
+    document.getElementById('prj_detail').value = p ? p["Ảnh chi tiết (URL)"] : '';
+    document.getElementById('prj_status').value = p ? p["Trạng thái"] : 'Hiển thị';
+    document.getElementById('prj_order').value  = p ? p["Thứ tự"] : 1;
+  } else {
+    document.getElementById('projectModalTitle').textContent = "Thêm dự án";
+    ['prj_name','prj_desc','prj_tags','prj_link','prj_thumb','prj_detail'].forEach(id => {
+      document.getElementById(id).value = '';
+    });
+    document.getElementById('prj_type').value   = 'Website';
+    document.getElementById('prj_status').value = 'Hiển thị';
+    document.getElementById('prj_order').value  = allProjects.length + 1;
+  }
+
+  document.getElementById('projectModalOverlay').classList.add('show');
+}
+
+function closeProjectModal(){
+  document.getElementById('projectModalOverlay').classList.remove('show');
+  editingProjectId = null;
+}
+document.getElementById('projectModalOverlay').addEventListener('click', e => {
+  if(e.target.id === 'projectModalOverlay') closeProjectModal();
+});
+
+async function handleSaveProject(){
+  const name   = document.getElementById('prj_name').value.trim();
+  const errBox = document.getElementById('projectModalError');
+  if(!name){
+    errBox.textContent = "Vui lòng nhập tên dự án.";
+    errBox.classList.add('show');
+    return;
+  }
+  errBox.classList.remove('show');
+
+  const token = sessionStorage.getItem('admin_token');
+  const btn   = document.getElementById('projectSaveBtn');
+  btn.disabled = true; btn.textContent = "Đang lưu...";
+
+  const data = {
+    name,
+    description : document.getElementById('prj_desc').value.trim(),
+    type        : document.getElementById('prj_type').value,
+    tags        : document.getElementById('prj_tags').value.trim(),
+    demoLink    : document.getElementById('prj_link').value.trim(),
+    thumbnail   : document.getElementById('prj_thumb').value.trim(),
+    detailImage : document.getElementById('prj_detail').value.trim(),
+    status      : document.getElementById('prj_status').value,
+    order       : Number(document.getElementById('prj_order').value) || 1
+  };
+
+  try{
+    const result = editingProjectId
+      ? await callBackend('updateProject', { token, id: editingProjectId, data })
+      : await callBackend('createProject', { token, data });
+
+    if(result.ok){
+      showToast(editingProjectId ? "Đã cập nhật dự án." : "Đã thêm dự án mới.");
+      closeProjectModal();
+      allProjects = []; // reset để force reload
+      loadProjectsTable();
+    } else {
+      errBox.textContent = result.error || "Có lỗi xảy ra.";
+      errBox.classList.add('show');
+    }
+  } catch(err){
+    errBox.textContent = "Không thể kết nối máy chủ.";
+    errBox.classList.add('show');
+  } finally {
+    btn.disabled = false; btn.textContent = "Lưu dự án";
+  }
+}
+
+async function handleToggleProjectStatus(id, newStatus){
+  const token = sessionStorage.getItem('admin_token');
+  try{
+    const result = await callBackend('updateProject', { token, id, data: { status: newStatus } });
+    if(result.ok){
+      showToast(newStatus === 'Hiển thị' ? "Đã hiện dự án." : "Đã ẩn dự án.");
+      allProjects = [];
+      loadProjectsTable();
+    } else { showToast("Lỗi: " + (result.error||"")); }
+  } catch{ showToast("Không thể kết nối."); }
+}
+
+async function handleDeleteProject(id, name){
+  if(!confirm(`Xoá dự án "${name}"? Hành động này không thể hoàn tác.`)) return;
+  const token = sessionStorage.getItem('admin_token');
+  try{
+    const result = await callBackend('deleteProject', { token, id });
+    if(result.ok){
+      showToast("Đã xoá dự án.");
+      allProjects = [];
+      loadProjectsTable();
+    } else { showToast("Lỗi: " + (result.error||"")); }
+  } catch{ showToast("Không thể kết nối."); }
+}
+
+/* =====================================================================
+   USERS — Admin view
+===================================================================== */
+let allUsers = [];
+
+async function loadUsersTable(){
+  const body  = document.getElementById('usersTableBody');
+  const token = sessionStorage.getItem('admin_token');
+  if(!isBackendConfigured()){ body.innerHTML = `<div class="dash-empty">Chưa cấu hình APPS_SCRIPT_URL.</div>`; return; }
+  if(!token){ showLoginScreen(); return; }
+  body.innerHTML = `<div class="dash-loading">Đang tải...</div>`;
+  try{
+    const result = await callBackendGet({ action:'listUsers', token });
+    if(result.ok){
+      allUsers = result.users || [];
+      renderUsersTable(allUsers);
+    } else {
+      if(result.error && result.error.includes('đăng nhập')){ sessionStorage.removeItem('admin_token'); showLoginScreen(); }
+      else body.innerHTML = `<div class="dash-empty">Lỗi: ${escapeHtml(result.error||'')}</div>`;
+    }
+  } catch{ body.innerHTML = `<div class="dash-empty">Không thể kết nối.</div>`; }
+}
+
+function renderUsersTable(users){
+  document.getElementById('uStatAll').textContent    = users.length;
+  document.getElementById('uStatActive').textContent = users.filter(u => u.status === 'Hoạt động').length;
+  document.getElementById('uStatLocked').textContent = users.filter(u => u.status === 'Đã khoá').length;
+
+  const body = document.getElementById('usersTableBody');
+  if(!users.length){ body.innerHTML = `<div class="dash-empty">Chưa có tài khoản nào.</div>`; return; }
+
+  let html = `<table class="dash-table"><thead><tr>
+    <th>Họ tên</th><th>Email</th><th>Ngày đăng ký</th><th>Trạng thái</th><th>Thao tác</th>
+  </tr></thead><tbody>`;
+  users.forEach(u => {
+    const locked = u.status === 'Đã khoá';
+    html += `<tr>
+      <td>${escapeHtml(u.name||'')}</td>
+      <td style="font-family:var(--font-mono);font-size:12.5px;">${escapeHtml(u.email||'')}</td>
+      <td style="font-size:12px;color:var(--ink-soft);">${escapeHtml(u.registeredAt||'')}</td>
+      <td><span class="svc-status-pill ${locked?'svc-status-inactive':'svc-status-active'}">${escapeHtml(u.status||'')}</span></td>
+      <td>
+        <div class="svc-actions">
+          <button onclick="handleToggleUser('${u.id}')" style="${locked?'color:var(--sage);':'color:#A8311A;'}">
+            ${locked ? 'Mở khoá' : 'Khoá'}
+          </button>
+        </div>
+      </td>
+    </tr>`;
+  });
+  html += `</tbody></table>`;
+  body.innerHTML = html;
+}
+
+async function handleToggleUser(id){
+  const token = sessionStorage.getItem('admin_token');
+  const user  = allUsers.find(u => u.id === id);
+  const action = user && user.status === 'Đã khoá' ? 'mở khoá' : 'khoá';
+  if(!confirm(`Bạn muốn ${action} tài khoản "${user?.email || id}"?`)) return;
+  try{
+    const result = await callBackend('deleteUser', { token, userId: id });
+    if(result.ok){
+      showToast(`Đã ${action} tài khoản.`);
+      allUsers = [];
+      loadUsersTable();
+    } else showToast('Lỗi: ' + (result.error||''));
+  } catch{ showToast('Không thể kết nối.'); }
+}
+
+document.getElementById('userSearchInput').addEventListener('input', e => {
+  const q = e.target.value.trim().toLowerCase();
+  if(!q){ renderUsersTable(allUsers); return; }
+  renderUsersTable(allUsers.filter(u =>
+    (u.name||'').toLowerCase().includes(q) || (u.email||'').toLowerCase().includes(q)
+  ));
+});
+
+/* =====================================================================
+   INIT — kiểm tra phiên đăng nhập ngay khi tải trang
+===================================================================== */
+(function init(){
+  const token = sessionStorage.getItem('admin_token');
+  if(token){
+    showDashShell();
+  } else {
+    showLoginScreen();
+  }
+})();
+</script>
+
+</body>
+</html>
